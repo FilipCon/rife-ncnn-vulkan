@@ -1,15 +1,13 @@
 // rife implemented with ncnn library
 
 #include "rife_ops.h"
-
 #include "warp.comp.hex.h"
 #include "warp_pack4.comp.hex.h"
 #include "warp_pack8.comp.hex.h"
 
 using namespace ncnn;
 
-Warp::Warp()
-{
+Warp::Warp() {
     support_vulkan = true;
 
     pipeline_warp = 0;
@@ -17,10 +15,8 @@ Warp::Warp()
     pipeline_warp_pack8 = 0;
 }
 
-int Warp::create_pipeline(const Option& opt)
-{
-    if (!vkdev)
-        return 0;
+int Warp::create_pipeline(const Option& opt) {
+    if (!vkdev) return 0;
 
     std::vector<vk_specialization_type> specializations(0 + 0);
 
@@ -30,9 +26,9 @@ int Warp::create_pipeline(const Option& opt)
         static ncnn::Mutex lock;
         {
             ncnn::MutexLockGuard guard(lock);
-            if (spirv.empty())
-            {
-                compile_spirv_module(warp_comp_data, sizeof(warp_comp_data), opt, spirv);
+            if (spirv.empty()) {
+                compile_spirv_module(warp_comp_data, sizeof(warp_comp_data),
+                                     opt, spirv);
             }
         }
 
@@ -47,40 +43,40 @@ int Warp::create_pipeline(const Option& opt)
         static ncnn::Mutex lock;
         {
             ncnn::MutexLockGuard guard(lock);
-            if (spirv.empty())
-            {
-                compile_spirv_module(warp_pack4_comp_data, sizeof(warp_pack4_comp_data), opt, spirv);
+            if (spirv.empty()) {
+                compile_spirv_module(warp_pack4_comp_data,
+                                     sizeof(warp_pack4_comp_data), opt, spirv);
             }
         }
 
         pipeline_warp_pack4 = new Pipeline(vkdev);
         pipeline_warp_pack4->set_optimal_local_size_xyz();
-        pipeline_warp_pack4->create(spirv.data(), spirv.size() * 4, specializations);
+        pipeline_warp_pack4->create(spirv.data(), spirv.size() * 4,
+                                    specializations);
     }
 
     // pack8
-    if (opt.use_shader_pack8)
-    {
+    if (opt.use_shader_pack8) {
         static std::vector<uint32_t> spirv;
         static ncnn::Mutex lock;
         {
             ncnn::MutexLockGuard guard(lock);
-            if (spirv.empty())
-            {
-                compile_spirv_module(warp_pack8_comp_data, sizeof(warp_pack8_comp_data), opt, spirv);
+            if (spirv.empty()) {
+                compile_spirv_module(warp_pack8_comp_data,
+                                     sizeof(warp_pack8_comp_data), opt, spirv);
             }
         }
 
         pipeline_warp_pack8 = new Pipeline(vkdev);
         pipeline_warp_pack8->set_optimal_local_size_xyz();
-        pipeline_warp_pack8->create(spirv.data(), spirv.size() * 4, specializations);
+        pipeline_warp_pack8->create(spirv.data(), spirv.size() * 4,
+                                    specializations);
     }
 
     return 0;
 }
 
-int Warp::destroy_pipeline(const Option& opt)
-{
+int Warp::destroy_pipeline(const Option& opt) {
     delete pipeline_warp;
     pipeline_warp = 0;
 
@@ -93,8 +89,8 @@ int Warp::destroy_pipeline(const Option& opt)
     return 0;
 }
 
-int Warp::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_blobs, const Option& opt) const
-{
+int Warp::forward(const std::vector<Mat>& bottom_blobs,
+                  std::vector<Mat>& top_blobs, const Option& opt) const {
     const Mat& image_blob = bottom_blobs[0];
     const Mat& flow_blob = bottom_blobs[1];
 
@@ -104,12 +100,10 @@ int Warp::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
 
     Mat& top_blob = top_blobs[0];
     top_blob.create(w, h, channels);
-    if (top_blob.empty())
-        return -100;
+    if (top_blob.empty()) return -100;
 
-    #pragma omp parallel for num_threads(opt.num_threads)
-    for (int q = 0; q < channels; q++)
-    {
+#pragma omp parallel for num_threads(opt.num_threads)
+    for (int q = 0; q < channels; q++) {
         float* outptr = top_blob.channel(q);
 
         const Mat image = image_blob.channel(q);
@@ -117,10 +111,8 @@ int Warp::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
         const float* fxptr = flow_blob.channel(0);
         const float* fyptr = flow_blob.channel(1);
 
-        for (int y = 0; y < h; y++)
-        {
-            for (int x = 0; x < w; x++)
-            {
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
                 float flow_x = fxptr[0];
                 float flow_y = fyptr[0];
 
@@ -167,8 +159,9 @@ int Warp::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_bl
     return 0;
 }
 
-int Warp::forward(const std::vector<VkMat>& bottom_blobs, std::vector<VkMat>& top_blobs, VkCompute& cmd, const Option& opt) const
-{
+int Warp::forward(const std::vector<VkMat>& bottom_blobs,
+                  std::vector<VkMat>& top_blobs, VkCompute& cmd,
+                  const Option& opt) const {
     const VkMat& image_blob = bottom_blobs[0];
     const VkMat& flow_blob = bottom_blobs[1];
 
@@ -180,8 +173,7 @@ int Warp::forward(const std::vector<VkMat>& bottom_blobs, std::vector<VkMat>& to
 
     VkMat& top_blob = top_blobs[0];
     top_blob.create(w, h, channels, elemsize, elempack, opt.blob_vkallocator);
-    if (top_blob.empty())
-        return -100;
+    if (top_blob.empty()) return -100;
 
     std::vector<VkMat> bindings(3);
     bindings[0] = image_blob;
@@ -194,15 +186,11 @@ int Warp::forward(const std::vector<VkMat>& bottom_blobs, std::vector<VkMat>& to
     constants[2].i = top_blob.c;
     constants[3].i = top_blob.cstep;
 
-    if (elempack == 8)
-    {
+    if (elempack == 8) {
         cmd.record_pipeline(pipeline_warp_pack8, bindings, constants, top_blob);
-    }
-    else if (elempack == 4)
-    {
+    } else if (elempack == 4) {
         cmd.record_pipeline(pipeline_warp_pack4, bindings, constants, top_blob);
-    }
-    else // if (elempack == 1)
+    } else // if (elempack == 1)
     {
         cmd.record_pipeline(pipeline_warp, bindings, constants, top_blob);
     }

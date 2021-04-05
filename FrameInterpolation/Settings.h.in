@@ -1,0 +1,6 @@
+#pragma once
+
+#include <string>
+
+std::string DATA_DIR = "@DATA_DIR@";
+std::string MODELS_DIR = "@MODELS_DIR@";

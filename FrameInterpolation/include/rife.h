@@ -8,10 +8,10 @@
 // ncnn
 #include "net.h"
 
-class RIFE
-{
-public:
-    RIFE(int gpuid, bool tta_mode = false, bool uhd_mode = false, int num_threads = 1, bool rife_v2 = false);
+class RIFE {
+ public:
+    RIFE(int gpuid, bool tta_mode = false, bool uhd_mode = false,
+         int num_threads = 1, bool rife_v2 = false);
     ~RIFE();
 
 #if _WIN32
@@ -20,11 +20,13 @@ public:
     int load(const std::string& modeldir);
 #endif
 
-    int process(const ncnn::Mat& in0image, const ncnn::Mat& in1image, float timestep, ncnn::Mat& outimage) const;
+    int process(const ncnn::Mat& in0image, const ncnn::Mat& in1image,
+                float timestep, ncnn::Mat& outimage) const;
 
-    int process_cpu(const ncnn::Mat& in0image, const ncnn::Mat& in1image, float timestep, ncnn::Mat& outimage) const;
+    int process_cpu(const ncnn::Mat& in0image, const ncnn::Mat& in1image,
+                    float timestep, ncnn::Mat& outimage) const;
 
-private:
+ private:
     ncnn::VulkanDevice* vkdev;
     ncnn::Net flownet;
     ncnn::Net contextnet;

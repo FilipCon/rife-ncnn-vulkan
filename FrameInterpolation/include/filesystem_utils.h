@@ -1,6 +1,7 @@
 #ifndef FILESYSTEM_UTILS_H
 #define FILESYSTEM_UTILS_H
 
+#include <cstring>
 #include <stdio.h>
 #include <vector>
 #include <string>
