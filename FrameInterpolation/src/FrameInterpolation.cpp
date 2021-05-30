@@ -6,7 +6,6 @@
 #include "cpu.h"
 #include "gpu.h"
 
-using namespace FrameInterpolation;
 void TaskQueue::put(const Task& v) {
     lock.lock();
     while (tasks.size() >= 8) condition.wait(lock); // TODO control queue size
@@ -113,23 +112,29 @@ Interpolation::~Interpolation() {
     ncnn::destroy_gpu_instance();
 }
 
-void Interpolation::load(const ncnn::Mat& image0, const ncnn::Mat& image1) {
+void Interpolation::load(void* image0, void* image1, int w, int h) {
     Task v;
     v.id = 0;
     v.timestep = timesteps[0];
-    v.in0image = image0;
-    v.in1image = image1;
-    v.outimage = ncnn::Mat(image0.w, image0.h, image0.data, (size_t)3, 3); // NOTE
+    v.in0image = ncnn::Mat(w, h, image0, (size_t) 3, 3);
+    v.in1image = ncnn::Mat(w, h, image1, (size_t) 3, 3);
+    v.outimage = ncnn::Mat(w, h, image0, (size_t) 3, 3); // NOTE create copy
     toProcQueue.put(v);
 }
 
-void Interpolation::save(ncnn::Mat& outImage) {
+void Interpolation::save(void* image) {
     Task v;
     toSaveQueue.get(v);
-    outImage = v.outimage;
+    image = v.outimage.data;
 }
 
-void* FrameInterpolation::proc(void* args) {
+void Interpolation::interpolate(void* image0, void* image1, void* output, int w,
+                                int h) {
+    load(image0, image1, w, h);
+    save(output);
+}
+
+void* proc(void* args) {
     const ProcThreadParams* ptp = (const ProcThreadParams*) args;
     const RIFE* rife = ptp->rife;
     Interpolation* s = ptp->s;

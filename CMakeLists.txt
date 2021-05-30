@@ -15,6 +15,7 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(OpenMP)
+find_package(OpenCV)
 find_package(PNG)
 find_package(ncnn REQUIRED)
 find_package(Vulkan REQUIRED)

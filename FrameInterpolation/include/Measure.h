@@ -1,8 +1,5 @@
-#include "FrameInterpolation.h"
-#include "ImageIO.h"
-#include "Settings.h"
+#pragma once
 #include <chrono>
-#include <iostream>
 
 // start measuring time
 #define START_CHRONO()                                                         \
@@ -18,27 +15,3 @@
                                                                        t1)     \
                          .count()                                              \
               << "ms" << std::endl;
-
-using namespace FrameInterpolation;
-
-int main(int argc, char* argv[]) {
-    // load images
-    ncnn::Mat image0;
-    ncnn::Mat image1;
-    loadImage(std::string(DATA_DIR + "/I2_0.png"), image0);
-    loadImage(std::string(DATA_DIR + "/I2_1.png"), image1);
-
-    // select ncnn model
-    std::string model = MODELS_DIR + "/rife-HD";
-
-    // interpolate images
-    Interpolation interpolator(model, 0, 0);
-    interpolator.load(image0, image1);
-
-    auto outImage = ncnn::Mat();
-    interpolator.save(outImage);
-
-    // save to file
-    saveImage(DATA_DIR + "/I2_X.png", outImage);
-    return 0;
-}

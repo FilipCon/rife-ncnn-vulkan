@@ -6,8 +6,6 @@
 #include "filesystem_utils.h"
 #include "rife.h"
 
-namespace FrameInterpolation {
-
 class Task {
  public:
     int id;
@@ -21,9 +19,7 @@ class Task {
 class TaskQueue {
  public:
     TaskQueue() {}
-
     void put(const Task& v);
-
     void get(Task& v);
 
  private:
@@ -40,16 +36,15 @@ struct ProcThreadParams {
 };
 
 class Interpolation {
-  public:
+ public:
     Interpolation(std::string model, int ttaMode, int uhdMode);
     ~Interpolation();
 
-    void load(const ncnn::Mat& image0, const ncnn::Mat& image1);
-  void save(ncnn::Mat& outImage);
-
+    void interpolate(void* image0, void* image1, void* output, int w, int h);
+    void load(void* image0, void* image1, int w, int h);
+    void save(void* image);
     void createGPUInstance(std::vector<int>& gpuid, std::vector<int>& jobs_proc,
                            int& use_gpu_count, int& total_jobs_proc);
-
     void startParallerProc();
 
     TaskQueue toProcQueue;
@@ -68,10 +63,3 @@ class Interpolation {
 };
 
 void* proc(void* args);
-
-}; // namespace FrameInterpolation
-
-extern "C" {
-// void interpolateFrames(FrameInterpolation::Task v, std::string model,
-//                        int tta_mode = 0, int uhd_mode = 0);
-}

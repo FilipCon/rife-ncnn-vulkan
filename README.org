@@ -1,0 +1,22 @@
+#+Title: frame-interpolation-rife
+#+Author: Filip Konstantinos
+#+Email: filipconstantinos@gmail.com
+
+* Introduction
+This project is a simplified version of the [[https://github.com/nihui/rife-ncnn-vulkan][rife-ncnn-vulkan]] repository. The
+project is a ncnn implementation of RIFE (Real-Time Intermediate Flow Estimation
+for Video Frame Interpolation). It uses ncnn project as the universal neural
+network inference framework.
+
+* Project description
+The current repository manages to build a watered down but more organized
+library (=.dll= on Windows, =.so= on Linux), that was meant to be used as a plugin
+for frame interpolation in Unity3D.
+
+* Note to self
+- Many features of the original project were not implemented.
+- It is not guaranteed that it will work correctly in other systems.
+- Execution is very slow, even when using the GPU (~1.5sec).
+
+* Acknowledgments
+Copyrights belong to the original author [[https://github.com/nihui][@nihui]]

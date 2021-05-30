@@ -2,3 +2,5 @@ dependencies/build
 dependencies/install
 dependencies/ncnn
 build/
+*.png
+*.webm

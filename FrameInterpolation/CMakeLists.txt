@@ -49,10 +49,10 @@ add_library(
   ${includes}
   )
 add_dependencies(${target} generate-spirv)
-target_link_libraries(${target} ncnn ${Vulkan_LIBRARY})
+target_link_libraries(${target} ncnn ${Vulkan_LIBRARY} )
 
 # add tests
-add_executable(FrameInterpolationTest test/test.cpp)
+add_executable(testRife test/testRife.cpp)
 if(X11_FOUND)
-  target_link_libraries(FrameInterpolationTest ${target} X11)
+  target_link_libraries(testRife ${target} ${OpenCV_LIBS} X11)
 endif()
